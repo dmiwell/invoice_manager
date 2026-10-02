@@ -84,6 +84,32 @@ flutter pub run build_runner build --delete-conflicting-outputs
 flutter run -d chrome
 ```
 
+### Deployment (GitHub Pages)
+
+```bash
+# 1. Commit and push sources
+git add -A
+git commit -m "..."
+git push origin main
+
+# 2. Build the web app (bundles CanvasKit locally and generates
+#    the offline-first service worker — required for PWA/offline use)
+tool/build_web.sh
+
+# 3. Publish build/web to the gh-pages branch
+dart run github_pages -d build/web
+```
+
+The site updates at `https://<username>.github.io/invoice_manager/` a minute or two later.
+Installed PWAs pick up the new version on the next online launch.
+
+To test the offline build locally without deploying:
+
+```bash
+tool/build_web.sh "/"                       # base href "/" for local serving
+python3 -m http.server 8080 -d build/web    # open http://localhost:8080/
+```
+
 ### First Run
 
 **Demo data included:** On first launch, sample data is automatically loaded (1 contractor, 1
