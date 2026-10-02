@@ -10,6 +10,7 @@ Usage: python3 tool/generate_service_worker.py build/web
 
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -87,6 +88,10 @@ def main() -> None:
         rel = file.relative_to(build_dir).as_posix()
         if rel == SW_NAME or rel.endswith(EXCLUDE_SUFFIXES) or rel.startswith(EXCLUDE_PREFIXES):
             continue
+        # Dotfiles (.DS_Store, .last_build_id) aren't served by GitHub Pages;
+        # a single 404 makes cache.addAll() fail and kills the whole install.
+        if any(part.startswith(".") for part in rel.split("/")):
+            continue
         resources.append(rel)
         digest.update(rel.encode())
         digest.update(file.read_bytes())
@@ -96,6 +101,19 @@ def main() -> None:
         "resources": json.dumps(resources, indent=2),
     }
     (build_dir / SW_NAME).write_text(sw)
+
+    # Strip Flutter's deprecated service worker registration from the
+    # bootstrap: it registers the same script under a different URL
+    # (?v=...), which races with the registration in index.html and keeps
+    # invalidating the active worker.
+    bootstrap = build_dir / "flutter_bootstrap.js"
+    code = bootstrap.read_text()
+    stripped = re.sub(
+        r"serviceWorkerSettings:\s*\{[^{}]*\},?", "", code, count=1
+    )
+    if stripped == code:
+        print("warning: serviceWorkerSettings not found in flutter_bootstrap.js")
+    bootstrap.write_text(stripped)
     total = sum((build_dir / r).stat().st_size for r in resources[1:])
     print(f"{SW_NAME}: {len(resources)} resources, {total / 1024 / 1024:.1f} MB precached")
 

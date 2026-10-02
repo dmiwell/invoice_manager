@@ -134,7 +134,7 @@ class InvoiceDetailsPanel extends StatelessWidget {
                       Expanded(
                         child: _buildSection(
                           context,
-                          child: _buildContractorInfo(contract.contractor),
+                          child: _buildContractorInfo(contract, dateFormat),
                         ),
                       ),
                       const SizedBox(width: 24),
@@ -224,13 +224,24 @@ class InvoiceDetailsPanel extends StatelessWidget {
     });
   }
 
-  Widget _buildContractorInfo(Contractor contractor) {
+  Widget _buildContractorInfo(Contract contract, DateFormat dateFormat) {
+    final contractor = contract.contractor;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           contractor.fullName,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          contract.contractorRoleSublabelOrDefault,
+          style: TextStyle(color: Colors.grey[600]),
+        ),
+        if (contract.description != null) Text(contract.description!),
+        Text(
+          '${contract.contractorAgreementLabelOrDefault} ${dateFormat.format(contract.date)}',
+          style: TextStyle(color: Colors.grey[600], fontSize: 12),
         ),
         const SizedBox(height: 12),
         if (contractor.contractorInfo != null) ...[

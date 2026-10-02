@@ -1,4 +1,4 @@
-# <img src="assets/icons/icon-192x192.png" alt="Invoice Manager Icon" width="30"> [Invoice Manager](https://alexgarbarev.github.io/invoice_manager/)
+# <img src="assets/icons/icon-192x192.png" alt="Invoice Manager Icon" width="30"> [Invoice Manager](https://yourusername/invoice_manager/)
 
 Simple invoice management app that works locally in your browser. For freelancers, independent
 contractors, and professionals working
@@ -152,11 +152,13 @@ Company ─────┘
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Authors
 
 Built with Flutter for freelancers and contractors.
 
 **By Aleksey Garbarev and local Qwen3.5 LLM**
+
+This fork is maintained by **Dmitriy Pomazunovskiy** with help from **Claude (Fable 5)**.
 
 ---
 
