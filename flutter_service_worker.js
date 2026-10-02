@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'invoice-manager-950547ecc869b944';
+const CACHE_NAME = 'invoice-manager-5ea7a364b3f8db32';
 const RESOURCES = [
   "./",
   "apple-touch-icon-114x114.png",
