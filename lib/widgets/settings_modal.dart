@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:invoice_manager/repositories/app_repository.dart';
 import 'package:provider/provider.dart';
 
+import '../services/auto_backup_service.dart';
 import '../services/backup_service.dart';
+import 'auto_backup_section.dart';
 import 'companies_management_modal.dart';
 import 'contract_management_modal.dart';
 import 'contractors_management_modal.dart';
@@ -165,6 +167,12 @@ class _SettingsModalState extends State<SettingsModal> with SingleTickerProvider
                               style: TextStyle(color: Colors.orange, fontSize: 12),
                               textAlign: TextAlign.center,
                             ),
+                            if (AutoBackupService.isSupported) ...[
+                              const SizedBox(height: 24),
+                              const SizedBox(width: 400, child: Divider()),
+                              const SizedBox(height: 24),
+                              const AutoBackupSection(),
+                            ],
                           ],
                         ),
                       ),

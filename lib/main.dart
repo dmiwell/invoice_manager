@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 import 'repositories/repositories.dart';
 import 'screens/home_screen.dart';
+import 'services/auto_backup_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +15,14 @@ void main() async {
   initializeDateFormatting();
   await SeedDataRepository(repo).seed();
   runApp(MyApp(repo: repo));
+
+  // Fire-and-forget: writes today's backup if an auto-backup folder is set.
+  unawaited(
+    AutoBackupService.runBackup(repo.database).catchError((Object e) {
+      debugPrint('Auto backup failed: $e');
+      return null;
+    }),
+  );
 }
 
 final darkModeNotifier = ValueNotifier<Brightness>(Brightness.light);
