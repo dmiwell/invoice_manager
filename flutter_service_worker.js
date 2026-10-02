@@ -1,9 +1,8 @@
 'use strict';
 
-const CACHE_NAME = 'invoice-manager-d91b5580eca38af1';
+const CACHE_NAME = 'invoice-manager-f3423bc59608e9da';
 const RESOURCES = [
   "./",
-  ".DS_Store",
   "apple-touch-icon-114x114.png",
   "apple-touch-icon-120x120.png",
   "apple-touch-icon-144x144.png",
@@ -14,7 +13,6 @@ const RESOURCES = [
   "apple-touch-icon-60x60.png",
   "apple-touch-icon-72x72.png",
   "apple-touch-icon-76x76.png",
-  "assets/.DS_Store",
   "assets/AssetManifest.bin",
   "assets/AssetManifest.bin.json",
   "assets/FontManifest.json",
@@ -49,7 +47,6 @@ const RESOURCES = [
   "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf",
   "assets/shaders/ink_sparkle.frag",
   "assets/shaders/stretch_effect.frag",
-  "canvaskit/.DS_Store",
   "canvaskit/canvaskit.js",
   "canvaskit/canvaskit.wasm",
   "canvaskit/chromium/canvaskit.js",
