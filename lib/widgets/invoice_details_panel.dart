@@ -38,6 +38,10 @@ class InvoiceDetailsPanel extends StatelessWidget {
         final contract = invoice.contract;
 
         final dateFormat = DateFormat('dd MMMM yyyy', contract.locale);
+        final currencyFormat = NumberFormat.currency(
+          symbol: contract.company.currencyPrefix ?? '\$',
+          decimalDigits: 2,
+        );
 
         return Padding(
           padding: const EdgeInsets.all(24.0),
@@ -158,7 +162,7 @@ class InvoiceDetailsPanel extends StatelessWidget {
                       mainAxisAlignment: .end,
                       children: [
                         Text(
-                          '${contract.totalLabelOrDefault}: \$${invoice.totalAmount.toStringAsFixed(2)}',
+                          '${contract.totalLabelOrDefault}: ${currencyFormat.format(invoice.totalAmount)}',
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -288,6 +292,10 @@ class InvoiceDetailsPanel extends StatelessWidget {
 
     final showPeriod = contract.showPeriod;
     final isFixed = contract.fixed;
+    final currencyFormat = NumberFormat.currency(
+      symbol: contract.company.currencyPrefix ?? '\$',
+      decimalDigits: 2,
+    );
 
     return Table(
       border: TableBorder.all(
@@ -364,11 +372,11 @@ class InvoiceDetailsPanel extends StatelessWidget {
               if (!isFixed)
                 Padding(
                   padding: const EdgeInsets.all(8),
-                  child: Text('\$${item.price.toStringAsFixed(2)}'),
+                  child: Text(currencyFormat.format(item.price)),
                 ),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: Text('\$${item.totalAmount.toStringAsFixed(2)}'),
+                child: Text(currencyFormat.format(item.totalAmount)),
               ),
             ],
           );
