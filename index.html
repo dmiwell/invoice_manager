@@ -55,6 +55,7 @@
   * https://docs.flutter.dev/platform-integration/web/initialization
 -->
 <script defer src="sql-wasm.js"></script>
+<script defer src="auto_backup.js"></script>
 
 <!--
   Register the offline-caching service worker explicitly: Flutter's own
@@ -64,7 +65,7 @@
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-            navigator.serviceWorker.register('flutter_service_worker.js?v=3686121359') /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
+            navigator.serviceWorker.register('flutter_service_worker.js?v=1296003127') /* Flutter's service worker is deprecated and will be removed in a future Flutter release. */;
         });
     }
 </script>
