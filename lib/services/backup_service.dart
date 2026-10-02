@@ -68,6 +68,7 @@ class BackupService {
         'contractor_id': contract.contractorId,
         'company_id': contract.companyId,
         'date': contract.date.toIso8601String(),
+        'contract_id': contract.contractId,
         'fixed': contract.fixed,
         'default_price': contract.defaultPrice,
         'show_period': contract.showPeriod,
@@ -233,6 +234,9 @@ class BackupService {
                   contractorId: Value(map['contractor_id'] as String),
                   companyId: Value(map['company_id'] as String),
                   date: Value(DateTime.parse(map['date'] as String)),
+                  contractId: map['contract_id'] != null
+                      ? Value(map['contract_id'] as String)
+                      : const Value<String>.absent(),
                   fixed: Value(map['fixed'] as bool),
                   defaultPrice: map['default_price'] != null
                       ? Value((map['default_price'] as num).toDouble())

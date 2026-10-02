@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,8 +15,7 @@ import 'markdown_pdf_builder.dart';
 
 class InvoicePdfService {
   static Future<void> exportInvoicePdf(Invoice invoice, AppRepository repo) async {
-    final pdf = await _generatePdfDocument(invoice, repo);
-    final bytes = await pdf.save();
+    final bytes = await generatePdfBytes(invoice);
 
     if (kIsWeb) {
       await _savePdfWeb(bytes, invoice.displayId);
@@ -26,7 +24,12 @@ class InvoicePdfService {
     }
   }
 
-  static Future<pw.Document> _generatePdfDocument(Invoice invoice, AppRepository repo) async {
+  static Future<Uint8List> generatePdfBytes(Invoice invoice) async {
+    final pdf = await _generatePdfDocument(invoice);
+    return pdf.save();
+  }
+
+  static Future<pw.Document> _generatePdfDocument(Invoice invoice) async {
     final pdf = pw.Document();
 
     final contract = invoice.contract;
@@ -43,6 +46,60 @@ class InvoicePdfService {
       decimalDigits: 2,
     );
 
+    pw.Widget infoRow(String label, String value) {
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 2),
+        child: pw.Row(
+          mainAxisSize: pw.MainAxisSize.min,
+          children: [
+            pw.Text(
+              '$label: ',
+              style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700),
+            ),
+            pw.Text(value, style: const pw.TextStyle(fontSize: 11, color: PdfColors.grey700)),
+          ],
+        ),
+      );
+    }
+
+    pw.Widget card({required String title, required List<pw.Widget> children}) {
+      return pw.Container(
+        padding: const pw.EdgeInsets.all(16),
+        decoration: pw.BoxDecoration(
+          color: PdfColors.grey100,
+          borderRadius: pw.BorderRadius.circular(8),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+          children: [
+            pw.Text(
+              title,
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(
+                fontSize: 14,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.grey600,
+              ),
+            ),
+            pw.SizedBox(height: 12),
+            pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: children),
+          ],
+        ),
+      );
+    }
+
+    final itemColumnWidths = <int, pw.TableColumnWidth>{};
+    {
+      var col = 0;
+      itemColumnWidths[col++] = const pw.FlexColumnWidth(3);
+      if (contract.showPeriod) itemColumnWidths[col++] = const pw.FlexColumnWidth(1.2);
+      if (!contract.fixed) {
+        itemColumnWidths[col++] = const pw.FlexColumnWidth(0.75);
+        itemColumnWidths[col++] = const pw.FlexColumnWidth(0.9);
+      }
+      itemColumnWidths[col] = const pw.FlexColumnWidth(1.3);
+    }
+
     var myTheme = pw.ThemeData.withFont(
       base: pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Regular.ttf')),
       bold: pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Bold.ttf')),
@@ -58,146 +115,49 @@ class InvoicePdfService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // Header
-              pw.Row(
-                mainAxisAlignment: .spaceBetween,
-                crossAxisAlignment: .start,
-                children: [
-                  pw.Flexible(
-                    child: pw.Column(
-                      crossAxisAlignment: .start,
-                      children: [
-                        pw.Text(
-                          contractor.fullName,
-                          style: pw.TextStyle(fontSize: 28, fontWeight: pw.FontWeight.bold),
-                        ),
-                        pw.SizedBox(height: 16),
-                        pw.Text(
-                          contract.contractorRoleSublabelOrDefault,
-                          style: const pw.TextStyle(fontSize: 16, color: PdfColors.grey700),
-                        ),
-                        pw.SizedBox(height: 4),
-                        if (contract.description != null)
-                          pw.Text(
-                            contract.description!,
-                            style: const pw.TextStyle(fontSize: 14),
-                          ),
-                        pw.SizedBox(height: 4),
-                        pw.Text(
-                          '${contract.contractorAgreementLabelOrDefault} ${dateFormat.format(contract.date)}',
-                          style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(4),
-                    child: pw.Column(
-                      crossAxisAlignment: .end,
-                      children: [
-                        pw.Text(
-                          contract.invoiceTitleOrDefault,
-                          style: pw.TextStyle(
-                            fontSize: 28,
-                            fontWeight: pw.FontWeight.bold,
-                            color: PdfColor.fromInt(Colors.blueGrey.toARGB32()),
-                          ),
-                        ),
-                        pw.SizedBox(height: 12),
-                        pw.Table(
-                          tableWidth: .min,
-                          children: [
-                            pw.TableRow(
-                              children: [
-                                pw.Text(
-                                  '${contract.invoiceIdLabelOrDefault}: ',
-                                  textAlign: .right,
-                                  style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey),
-                                ),
-                                pw.Text(
-                                  invoice.displayId,
-                                  textAlign: .left,
-                                  style: const pw.TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            pw.TableRow(
-                              children: [
-                                pw.Text(
-                                  '${contract.dateLabelOrDefault}: ',
-                                  textAlign: .right,
-                                  style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey),
-                                ),
-                                pw.Text(
-                                  dateFormat.format(invoice.date),
-                                  textAlign: .left,
-                                  style: const pw.TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                            pw.TableRow(
-                              children: [
-                                pw.Text(
-                                  '${contract.dueDateLabelOrDefault}: ',
-                                  textAlign: .right,
-                                  style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey),
-                                ),
-                                pw.Text(
-                                  dateFormat.format(invoice.dueDate),
-                                  textAlign: .left,
-                                  style: const pw.TextStyle(fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              // Header — mirrors the invoice details panel layout
+              pw.Text(
+                contract.invoiceTitleOrDefault,
+                style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
               ),
-              pw.SizedBox(height: 16),
-
-              // Sides
+              pw.SizedBox(height: 8),
+              infoRow(contract.invoiceIdLabelOrDefault, invoice.displayId),
+              infoRow(contract.dateLabelOrDefault, dateFormat.format(invoice.date)),
+              infoRow(contract.dueDateLabelOrDefault, dateFormat.format(invoice.dueDate)),
+              infoRow('Contract', contract.reference(dateFormat)),
+              pw.SizedBox(height: 24),
               pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
-                    child: pw.Column(
-                      crossAxisAlignment: .start,
+                    child: card(
+                      title: contract.contractorRoleSublabelOrDefault,
                       children: [
+                        pw.Text(
+                          contractor.fullName,
+                          style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                        ),
+                        if (contract.description != null) ...[
+                          pw.SizedBox(height: 4),
+                          pw.Text(contract.description!),
+                        ],
+                        pw.SizedBox(height: 12),
                         MarkdownPdfBuilder(
                           text: contractor.contractorInfo ?? '',
                           linkColor: PdfColors.blue700,
                         ).build(),
                         if (contractor.signature != null) ...[
-                          pw.SizedBox(height: 16),
+                          pw.SizedBox(height: 12),
                           pw.Row(
                             children: [
-                              pw.Text('Signed: '),
-                              pw.SizedBox(width: 8),
-                              pw.Stack(
-                                children: [
-                                  pw.Container(
-                                    width: 100,
-                                    height: 24,
-                                    decoration: const pw.BoxDecoration(
-                                      border: const pw.Border(
-                                        bottom: const pw.BorderSide(color: PdfColors.grey700),
-                                      ),
-                                    ),
-                                  ),
-                                  pw.Padding(
-                                    padding: const pw.EdgeInsets.only(left: 24, top: 4),
-                                    child: pw.Image(
-                                      pw.MemoryImage(contractor.signature!),
-                                      height: 32,
-                                      fit: pw.BoxFit.contain,
-                                    ),
-                                  ),
-                                ],
+                              pw.Text(
+                                'Signature: ',
+                                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                              ),
+                              pw.Image(
+                                pw.MemoryImage(contractor.signature!),
+                                height: 36,
+                                fit: pw.BoxFit.contain,
                               ),
                             ],
                           ),
@@ -205,12 +165,17 @@ class InvoicePdfService {
                       ],
                     ),
                   ),
+                  pw.SizedBox(width: 24),
                   pw.Expanded(
-                    child: pw.Column(
-                      crossAxisAlignment: .end,
+                    child: card(
+                      title: 'Client',
                       children: [
+                        pw.Text(
+                          company.name,
+                          style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+                        ),
+                        pw.SizedBox(height: 12),
                         MarkdownPdfBuilder(
-                          textAlign: .right,
                           text: company.companyInfo ?? '',
                           linkColor: PdfColors.blue700,
                         ).build(),
@@ -229,6 +194,7 @@ class InvoicePdfService {
                   border: pw.TableBorder.symmetric(
                     inside: const pw.BorderSide(color: PdfColors.grey300, width: 1),
                   ),
+                  columnWidths: itemColumnWidths,
                   children: [
                     pw.TableRow(
                       decoration: const pw.BoxDecoration(

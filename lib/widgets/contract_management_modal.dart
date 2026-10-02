@@ -29,6 +29,7 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
   Contractor? _selectedContractor;
   Company? _selectedCompany;
 
+  String? _contractId;
   String? _qtyLabel;
   String? _priceLabel;
   String? _descriptionLabel;
@@ -45,6 +46,7 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
   String? _contractorAgreementLabel;
   String? _locale;
 
+  final _contractIdController = TextEditingController();
   final _qtyLabelController = TextEditingController();
   final _priceLabelController = TextEditingController();
   final _descriptionLabelController = TextEditingController();
@@ -163,6 +165,9 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
   }
 
   void _syncControllers() {
+    if (_contractIdController.text != (_contractId ?? '')) {
+      _contractIdController.text = _contractId ?? '';
+    }
     if (_qtyLabelController.text != (_qtyLabel ?? '')) {
       _qtyLabelController.text = _qtyLabel ?? '';
     }
@@ -213,6 +218,7 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
 
   @override
   void dispose() {
+    _contractIdController.dispose();
     _qtyLabelController.dispose();
     _priceLabelController.dispose();
     _descriptionLabelController.dispose();
@@ -246,6 +252,7 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
     _defaultPrice = null;
     _showPeriod = true;
     _customizeLabels = false;
+    _contractId = null;
     _qtyLabel = null;
     _priceLabel = null;
     _descriptionLabel = null;
@@ -263,6 +270,7 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
     _locale = null;
     _selectedContractor = null;
     _selectedCompany = null;
+    _contractIdController.text = '';
     _qtyLabelController.text = '';
     _priceLabelController.text = '';
     _descriptionLabelController.text = '';
@@ -288,6 +296,7 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
       _defaultPrice = contract.defaultPrice;
       _showPeriod = contract.showPeriod;
       _customizeLabels = contract.hasCustomizations;
+      _contractId = contract.contractId;
       _qtyLabel = contract.qtyLabel;
       _priceLabel = contract.priceLabel;
       _descriptionLabel = contract.descriptionLabel;
@@ -305,6 +314,7 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
       _locale = contract.locale;
       _selectedContractor = contract.contractor;
       _selectedCompany = contract.company;
+      _contractIdController.text = contract.contractId ?? '';
       _qtyLabelController.text = contract.qtyLabel ?? '';
       _priceLabelController.text = contract.priceLabel ?? '';
       _descriptionLabelController.text = contract.descriptionLabel ?? '';
@@ -332,6 +342,7 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
         contractor: _selectedContractor!,
         company: _selectedCompany!,
         date: _date,
+        contractId: _contractId,
         fixed: _fixed,
         defaultPrice: _fixed ? null : _defaultPrice,
         showPeriod: _showPeriod,
@@ -466,6 +477,14 @@ class _ContractManagementModalState extends State<ContractManagementModal> {
                     label: 'Contract Date',
                     value: _date,
                     onTap: () => _selectDate(context),
+                  ),
+                  const SizedBox(height: 12),
+                  StringTextField(
+                    label: 'Contract ID (optional, shown on invoice instead of contract date)',
+                    controller: _contractIdController,
+                    onChanged: (value) {
+                      _contractId = value.isEmpty ? null : value;
+                    },
                   ),
                   const SizedBox(height: 12),
                   TextMultilineField(

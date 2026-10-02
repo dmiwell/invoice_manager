@@ -32,6 +32,7 @@ class DbContracts extends Table {
   TextColumn get contractorId => text()();
   TextColumn get companyId => text()();
   DateTimeColumn get date => dateTime()();
+  TextColumn get contractId => text().nullable()();
   BoolColumn get fixed => boolean().withDefault(const Constant(false))();
   RealColumn get defaultPrice => real().nullable()();
   BoolColumn get showPeriod => boolean().withDefault(const Constant(true))();

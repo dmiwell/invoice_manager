@@ -9,6 +9,7 @@ class Contract implements Identifiable {
   final Contractor contractor;
   final Company company;
   final DateTime date;
+  final String? contractId;
   final bool fixed;
   final double? defaultPrice;
   final bool showPeriod;
@@ -33,6 +34,7 @@ class Contract implements Identifiable {
     required this.contractor,
     required this.company,
     required this.date,
+    this.contractId,
     required this.fixed,
     this.defaultPrice,
     required this.showPeriod,
@@ -84,6 +86,10 @@ class Contract implements Identifiable {
 
   String get contractorAgreementLabelOrDefault =>
       contractorAgreementLabel ?? 'Contractor Agreement dated';
+
+  /// Shown next to the "Contract" label: the explicit contract ID when set,
+  /// otherwise the contract date.
+  String reference(DateFormat dateFormat) => contractId ?? 'Dated ${dateFormat.format(date)}';
  
   bool get hasCustomizations =>
       qtyLabel != null ||
@@ -106,6 +112,7 @@ class Contract implements Identifiable {
     Contractor? contractor,
     Company? company,
     DateTime? date,
+    String? contractId,
     bool? fixed,
     double? defaultPrice,
     bool? showPeriod,
@@ -130,6 +137,7 @@ class Contract implements Identifiable {
       contractor: contractor ?? this.contractor,
       company: company ?? this.company,
       date: date ?? this.date,
+      contractId: contractId ?? this.contractId,
       fixed: fixed ?? this.fixed,
       defaultPrice: defaultPrice ?? this.defaultPrice,
       showPeriod: showPeriod ?? this.showPeriod,
@@ -158,6 +166,7 @@ class Contract implements Identifiable {
           runtimeType == other.runtimeType &&
           id == other.id &&
           date == other.date &&
+          contractId == other.contractId &&
           fixed == other.fixed &&
           defaultPrice == other.defaultPrice &&
           showPeriod == other.showPeriod &&
@@ -178,9 +187,10 @@ class Contract implements Identifiable {
           locale == other.locale;
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     date,
+    contractId,
     fixed,
     defaultPrice,
     showPeriod,
@@ -199,7 +209,7 @@ class Contract implements Identifiable {
     footnote,
     contractorAgreementLabel,
     locale,
-  );
+  ]);
 
   @override
   String toString() {

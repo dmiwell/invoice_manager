@@ -118,6 +118,7 @@ class InvoiceDetailsPanel extends StatelessWidget {
                             contract.dueDateLabelOrDefault,
                             dateFormat.format(invoice.dueDate),
                           ),
+                          _buildInvoiceInfoRow('Contract', contract.reference(dateFormat)),
                           _buildInvoiceInfoRow(
                             'Status',
                             invoice.status.name.toUpperCase(),
@@ -134,13 +135,15 @@ class InvoiceDetailsPanel extends StatelessWidget {
                       Expanded(
                         child: _buildSection(
                           context,
-                          child: _buildContractorInfo(contract, dateFormat),
+                          title: contract.contractorRoleSublabelOrDefault,
+                          child: _buildContractorInfo(contract),
                         ),
                       ),
                       const SizedBox(width: 24),
                       Expanded(
                         child: _buildSection(
                           context,
+                          title: 'Client',
                           child: _buildCompanyInfo(contract.company),
                         ),
                       ),
@@ -209,12 +212,23 @@ class InvoiceDetailsPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, {required Widget child}) {
+  Widget _buildSection(BuildContext context, {required String title, required Widget child}) {
     final color = Theme.of(context).brightness == .light ? Colors.grey[50] : Colors.grey[850];
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
-      child: child,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 12),
+          child,
+        ],
+      ),
     );
   }
 
@@ -224,7 +238,7 @@ class InvoiceDetailsPanel extends StatelessWidget {
     });
   }
 
-  Widget _buildContractorInfo(Contract contract, DateFormat dateFormat) {
+  Widget _buildContractorInfo(Contract contract) {
     final contractor = contract.contractor;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,16 +247,10 @@ class InvoiceDetailsPanel extends StatelessWidget {
           contractor.fullName,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
-        const SizedBox(height: 4),
-        Text(
-          contract.contractorRoleSublabelOrDefault,
-          style: TextStyle(color: Colors.grey[600]),
-        ),
-        if (contract.description != null) Text(contract.description!),
-        Text(
-          '${contract.contractorAgreementLabelOrDefault} ${dateFormat.format(contract.date)}',
-          style: TextStyle(color: Colors.grey[600], fontSize: 12),
-        ),
+        if (contract.description != null) ...[
+          const SizedBox(height: 4),
+          Text(contract.description!),
+        ],
         const SizedBox(height: 12),
         if (contractor.contractorInfo != null) ...[
           const SizedBox(height: 4),

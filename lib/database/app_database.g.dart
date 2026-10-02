@@ -1051,6 +1051,17 @@ class $DbContractsTable extends DbContracts
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _contractIdMeta = const VerificationMeta(
+    'contractId',
+  );
+  @override
+  late final GeneratedColumn<String> contractId = GeneratedColumn<String>(
+    'contract_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _fixedMeta = const VerificationMeta('fixed');
   @override
   late final GeneratedColumn<bool> fixed = GeneratedColumn<bool>(
@@ -1259,6 +1270,7 @@ class $DbContractsTable extends DbContracts
     contractorId,
     companyId,
     date,
+    contractId,
     fixed,
     defaultPrice,
     showPeriod,
@@ -1321,6 +1333,12 @@ class $DbContractsTable extends DbContracts
       );
     } else if (isInserting) {
       context.missing(_dateMeta);
+    }
+    if (data.containsKey('contract_id')) {
+      context.handle(
+        _contractIdMeta,
+        contractId.isAcceptableOrUnknown(data['contract_id']!, _contractIdMeta),
+      );
     }
     if (data.containsKey('fixed')) {
       context.handle(
@@ -1485,6 +1503,10 @@ class $DbContractsTable extends DbContracts
         DriftSqlType.dateTime,
         data['${effectivePrefix}date'],
       )!,
+      contractId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contract_id'],
+      ),
       fixed: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}fixed'],
@@ -1571,6 +1593,7 @@ class DbContract extends DataClass implements Insertable<DbContract> {
   final String contractorId;
   final String companyId;
   final DateTime date;
+  final String? contractId;
   final bool fixed;
   final double? defaultPrice;
   final bool showPeriod;
@@ -1594,6 +1617,7 @@ class DbContract extends DataClass implements Insertable<DbContract> {
     required this.contractorId,
     required this.companyId,
     required this.date,
+    this.contractId,
     required this.fixed,
     this.defaultPrice,
     required this.showPeriod,
@@ -1620,6 +1644,9 @@ class DbContract extends DataClass implements Insertable<DbContract> {
     map['contractor_id'] = Variable<String>(contractorId);
     map['company_id'] = Variable<String>(companyId);
     map['date'] = Variable<DateTime>(date);
+    if (!nullToAbsent || contractId != null) {
+      map['contract_id'] = Variable<String>(contractId);
+    }
     map['fixed'] = Variable<bool>(fixed);
     if (!nullToAbsent || defaultPrice != null) {
       map['default_price'] = Variable<double>(defaultPrice);
@@ -1683,6 +1710,9 @@ class DbContract extends DataClass implements Insertable<DbContract> {
       contractorId: Value(contractorId),
       companyId: Value(companyId),
       date: Value(date),
+      contractId: contractId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(contractId),
       fixed: Value(fixed),
       defaultPrice: defaultPrice == null && nullToAbsent
           ? const Value.absent()
@@ -1746,6 +1776,7 @@ class DbContract extends DataClass implements Insertable<DbContract> {
       contractorId: serializer.fromJson<String>(json['contractorId']),
       companyId: serializer.fromJson<String>(json['companyId']),
       date: serializer.fromJson<DateTime>(json['date']),
+      contractId: serializer.fromJson<String?>(json['contractId']),
       fixed: serializer.fromJson<bool>(json['fixed']),
       defaultPrice: serializer.fromJson<double?>(json['defaultPrice']),
       showPeriod: serializer.fromJson<bool>(json['showPeriod']),
@@ -1778,6 +1809,7 @@ class DbContract extends DataClass implements Insertable<DbContract> {
       'contractorId': serializer.toJson<String>(contractorId),
       'companyId': serializer.toJson<String>(companyId),
       'date': serializer.toJson<DateTime>(date),
+      'contractId': serializer.toJson<String?>(contractId),
       'fixed': serializer.toJson<bool>(fixed),
       'defaultPrice': serializer.toJson<double?>(defaultPrice),
       'showPeriod': serializer.toJson<bool>(showPeriod),
@@ -1808,6 +1840,7 @@ class DbContract extends DataClass implements Insertable<DbContract> {
     String? contractorId,
     String? companyId,
     DateTime? date,
+    Value<String?> contractId = const Value.absent(),
     bool? fixed,
     Value<double?> defaultPrice = const Value.absent(),
     bool? showPeriod,
@@ -1831,6 +1864,7 @@ class DbContract extends DataClass implements Insertable<DbContract> {
     contractorId: contractorId ?? this.contractorId,
     companyId: companyId ?? this.companyId,
     date: date ?? this.date,
+    contractId: contractId.present ? contractId.value : this.contractId,
     fixed: fixed ?? this.fixed,
     defaultPrice: defaultPrice.present ? defaultPrice.value : this.defaultPrice,
     showPeriod: showPeriod ?? this.showPeriod,
@@ -1864,6 +1898,9 @@ class DbContract extends DataClass implements Insertable<DbContract> {
           : this.contractorId,
       companyId: data.companyId.present ? data.companyId.value : this.companyId,
       date: data.date.present ? data.date.value : this.date,
+      contractId: data.contractId.present
+          ? data.contractId.value
+          : this.contractId,
       fixed: data.fixed.present ? data.fixed.value : this.fixed,
       defaultPrice: data.defaultPrice.present
           ? data.defaultPrice.value
@@ -1918,6 +1955,7 @@ class DbContract extends DataClass implements Insertable<DbContract> {
           ..write('contractorId: $contractorId, ')
           ..write('companyId: $companyId, ')
           ..write('date: $date, ')
+          ..write('contractId: $contractId, ')
           ..write('fixed: $fixed, ')
           ..write('defaultPrice: $defaultPrice, ')
           ..write('showPeriod: $showPeriod, ')
@@ -1946,6 +1984,7 @@ class DbContract extends DataClass implements Insertable<DbContract> {
     contractorId,
     companyId,
     date,
+    contractId,
     fixed,
     defaultPrice,
     showPeriod,
@@ -1973,6 +2012,7 @@ class DbContract extends DataClass implements Insertable<DbContract> {
           other.contractorId == this.contractorId &&
           other.companyId == this.companyId &&
           other.date == this.date &&
+          other.contractId == this.contractId &&
           other.fixed == this.fixed &&
           other.defaultPrice == this.defaultPrice &&
           other.showPeriod == this.showPeriod &&
@@ -1998,6 +2038,7 @@ class DbContractsCompanion extends UpdateCompanion<DbContract> {
   final Value<String> contractorId;
   final Value<String> companyId;
   final Value<DateTime> date;
+  final Value<String?> contractId;
   final Value<bool> fixed;
   final Value<double?> defaultPrice;
   final Value<bool> showPeriod;
@@ -2022,6 +2063,7 @@ class DbContractsCompanion extends UpdateCompanion<DbContract> {
     this.contractorId = const Value.absent(),
     this.companyId = const Value.absent(),
     this.date = const Value.absent(),
+    this.contractId = const Value.absent(),
     this.fixed = const Value.absent(),
     this.defaultPrice = const Value.absent(),
     this.showPeriod = const Value.absent(),
@@ -2047,6 +2089,7 @@ class DbContractsCompanion extends UpdateCompanion<DbContract> {
     required String contractorId,
     required String companyId,
     required DateTime date,
+    this.contractId = const Value.absent(),
     this.fixed = const Value.absent(),
     this.defaultPrice = const Value.absent(),
     this.showPeriod = const Value.absent(),
@@ -2075,6 +2118,7 @@ class DbContractsCompanion extends UpdateCompanion<DbContract> {
     Expression<String>? contractorId,
     Expression<String>? companyId,
     Expression<DateTime>? date,
+    Expression<String>? contractId,
     Expression<bool>? fixed,
     Expression<double>? defaultPrice,
     Expression<bool>? showPeriod,
@@ -2100,6 +2144,7 @@ class DbContractsCompanion extends UpdateCompanion<DbContract> {
       if (contractorId != null) 'contractor_id': contractorId,
       if (companyId != null) 'company_id': companyId,
       if (date != null) 'date': date,
+      if (contractId != null) 'contract_id': contractId,
       if (fixed != null) 'fixed': fixed,
       if (defaultPrice != null) 'default_price': defaultPrice,
       if (showPeriod != null) 'show_period': showPeriod,
@@ -2129,6 +2174,7 @@ class DbContractsCompanion extends UpdateCompanion<DbContract> {
     Value<String>? contractorId,
     Value<String>? companyId,
     Value<DateTime>? date,
+    Value<String?>? contractId,
     Value<bool>? fixed,
     Value<double?>? defaultPrice,
     Value<bool>? showPeriod,
@@ -2154,6 +2200,7 @@ class DbContractsCompanion extends UpdateCompanion<DbContract> {
       contractorId: contractorId ?? this.contractorId,
       companyId: companyId ?? this.companyId,
       date: date ?? this.date,
+      contractId: contractId ?? this.contractId,
       fixed: fixed ?? this.fixed,
       defaultPrice: defaultPrice ?? this.defaultPrice,
       showPeriod: showPeriod ?? this.showPeriod,
@@ -2192,6 +2239,9 @@ class DbContractsCompanion extends UpdateCompanion<DbContract> {
     }
     if (date.present) {
       map['date'] = Variable<DateTime>(date.value);
+    }
+    if (contractId.present) {
+      map['contract_id'] = Variable<String>(contractId.value);
     }
     if (fixed.present) {
       map['fixed'] = Variable<bool>(fixed.value);
@@ -2264,6 +2314,7 @@ class DbContractsCompanion extends UpdateCompanion<DbContract> {
           ..write('contractorId: $contractorId, ')
           ..write('companyId: $companyId, ')
           ..write('date: $date, ')
+          ..write('contractId: $contractId, ')
           ..write('fixed: $fixed, ')
           ..write('defaultPrice: $defaultPrice, ')
           ..write('showPeriod: $showPeriod, ')
@@ -3764,6 +3815,7 @@ typedef $$DbContractsTableCreateCompanionBuilder =
       required String contractorId,
       required String companyId,
       required DateTime date,
+      Value<String?> contractId,
       Value<bool> fixed,
       Value<double?> defaultPrice,
       Value<bool> showPeriod,
@@ -3790,6 +3842,7 @@ typedef $$DbContractsTableUpdateCompanionBuilder =
       Value<String> contractorId,
       Value<String> companyId,
       Value<DateTime> date,
+      Value<String?> contractId,
       Value<bool> fixed,
       Value<double?> defaultPrice,
       Value<bool> showPeriod,
@@ -3837,6 +3890,11 @@ class $$DbContractsTableFilterComposer
 
   ColumnFilters<DateTime> get date => $composableBuilder(
     column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contractId => $composableBuilder(
+    column: $table.contractId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3960,6 +4018,11 @@ class $$DbContractsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get contractId => $composableBuilder(
+    column: $table.contractId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get fixed => $composableBuilder(
     column: $table.fixed,
     builder: (column) => ColumnOrderings(column),
@@ -4073,6 +4136,11 @@ class $$DbContractsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get contractId => $composableBuilder(
+    column: $table.contractId,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get fixed =>
       $composableBuilder(column: $table.fixed, builder: (column) => column);
@@ -4190,6 +4258,7 @@ class $$DbContractsTableTableManager
                 Value<String> contractorId = const Value.absent(),
                 Value<String> companyId = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
+                Value<String?> contractId = const Value.absent(),
                 Value<bool> fixed = const Value.absent(),
                 Value<double?> defaultPrice = const Value.absent(),
                 Value<bool> showPeriod = const Value.absent(),
@@ -4214,6 +4283,7 @@ class $$DbContractsTableTableManager
                 contractorId: contractorId,
                 companyId: companyId,
                 date: date,
+                contractId: contractId,
                 fixed: fixed,
                 defaultPrice: defaultPrice,
                 showPeriod: showPeriod,
@@ -4240,6 +4310,7 @@ class $$DbContractsTableTableManager
                 required String contractorId,
                 required String companyId,
                 required DateTime date,
+                Value<String?> contractId = const Value.absent(),
                 Value<bool> fixed = const Value.absent(),
                 Value<double?> defaultPrice = const Value.absent(),
                 Value<bool> showPeriod = const Value.absent(),
@@ -4264,6 +4335,7 @@ class $$DbContractsTableTableManager
                 contractorId: contractorId,
                 companyId: companyId,
                 date: date,
+                contractId: contractId,
                 fixed: fixed,
                 defaultPrice: defaultPrice,
                 showPeriod: showPeriod,
