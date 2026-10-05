@@ -2,6 +2,9 @@
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+@JS('autoBackup')
+external JSObject? get _autoBackup;
+
 @JS('autoBackup.isSupported')
 external bool _isSupported();
 
@@ -28,7 +31,9 @@ external JSPromise<JSString?> _writeBackup(
   JSNumber keepCount,
 );
 
-bool get isSupported => _isSupported();
+// The null check guards against auto_backup.js not being loaded (e.g. a
+// stale service worker cache serving a mixed app version).
+bool get isSupported => _autoBackup != null && _isSupported();
 
 /// Returns the chosen directory name, or null if the user cancelled the picker.
 Future<String?> chooseDirectory() async {
